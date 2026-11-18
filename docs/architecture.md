@@ -51,7 +51,7 @@ flowchart LR
 | Framework | Next.js 16 (App Router), React 19, TypeScript (strict) | One full-stack codebase. Course standard. Vercel preview deploys. |
 | UI | Tailwind CSS 4 + shadcn/ui | Accessible components we own and can edit. No runtime CSS cost. |
 | Database | PostgreSQL on Neon (free tier) | Relational data (leads, showings, rules). Free branches for test databases. |
-| ORM | Prisma 7 with the Neon driver adapter | Type-safe queries, migrations, seed script. Queries are parameterized (no SQL injection). |
+| ORM | Prisma 7 with the Neon driver adapter | Type-safe queries, migrations, seed script. Queries are parameterized (no SQL injection). Pin `prisma@7`, because npm's `latest` tag for the `prisma` CLI points to an 8.0 release candidate. |
 | Auth | Better Auth (email + password, roles) | See ADR-3. |
 | Validation | Zod | One schema validates forms on the client and the server. |
 | Email | Outbox table + Resend free tier (optional) | See ADR-6. |
@@ -59,6 +59,8 @@ flowchart LR
 | CI/CD | GitHub Actions + Vercel | Free on a public repo. See [security.md](security.md) for the security gates. |
 
 ## Architecture decisions (ADRs)
+
+**ADR-0: Stable releases only.** Every dependency uses its newest stable release, never beta, RC, canary or alpha. This is a team decision (Nov 18). Before installing, check `npm view <pkg> dist-tags`, because some `latest` tags point to pre-releases.
 
 **ADR-1: Next.js 16 App Router as the full stack.** Pages, mutations (Server Actions) and APIs (Route Handlers) live in one app. This version differs from older Next.js: `middleware.ts` is now `proxy.ts`, request APIs such as `cookies()` and `params` are async, and Cache Components are on (ADR-11). Always check `node_modules/next/dist/docs/` first.
 
