@@ -27,7 +27,7 @@ Read these when needed (not imported):
 | `npm run dev` | Dev server at http://localhost:3000 (Turbopack) | ready |
 | `npm run build` | Production build | ready |
 | `npm run lint` | ESLint (flat config, `next/core-web-vitals` + TypeScript) | ready |
-| `npm run typecheck` | `tsc --noEmit` | ready |
+| `npm run typecheck` | `next typegen && tsc --noEmit` (generates route types such as `LayoutProps` first, so it works on a fresh clone) | ready |
 | `npm test` / `npm run test:watch` / `npm run test:coverage` | Vitest (`vitest.config.ts`, 70% coverage thresholds) | ready |
 | `npm run test:e2e` | Playwright | added with Playwright |
 | `npm run format` | Prettier | added with Prettier |
