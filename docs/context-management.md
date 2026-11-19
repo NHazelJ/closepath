@@ -48,7 +48,7 @@ Claude Code's context window holds the conversation, every file it reads, and `C
 |---|---|
 | `/init` creating the first `CLAUDE.md` | [proposed](screenshots/hw4-init-proposed.png), [done](screenshots/hw4-init-done.png) |
 | `/export` saving the `/init` session (now [`session-logs/01-init.txt`](session-logs/01-init.txt)) | [export](screenshots/hw4-context-export.png) |
-| `/context` showing what fills the window | [context](screenshots/hw4-context-usage.png) |
+| `/context` showing what fills the window. Before the import fix, memory files listed only `CLAUDE.md` (4.4k tokens); after it, all 6 files (18.7k tokens) | [before](screenshots/hw4-context-usage.png), [after](screenshots/hw4-context-usage-after-fix.png) |
 | `/compact` with a focus | [compact](screenshots/hw4-context-compact.png) |
 | `claude --continue` reopening the last session | [continue](screenshots/hw4-context-continue.png) |
 | `/clear` before a new task | [clear](screenshots/hw4-context-clear.png) |

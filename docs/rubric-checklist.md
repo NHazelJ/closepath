@@ -20,7 +20,7 @@ Sources: the Canvas rubrics and the course's [Project 3 page](https://github.com
 - [x] **/init screenshot:** `docs/screenshots/hw4-init-proposed.png` and `hw4-init-done.png`, with the email blacked out.
 - [x] **CLAUDE.md iterated after /init:** the commit "docs: rewrite CLAUDE.md v2 ...". `git diff` against v1 shows the changes.
 - [x] **Permissions:** allow, ask and deny lists plus the sandbox in `.claude/settings.json`. Explained and tested in `docs/security.md` ("Claude Code permissions"). Screenshots: `docs/screenshots/hw4-permissions-*.png`.
-- [ ] **Context management strategy:** `docs/context-management.md` is written. Still needed: screenshots of `/context`, `/compact`, `claude --continue` and `/clear`.
+- [x] **Context management strategy:** `docs/context-management.md`, with screenshots of `/context` (before and after the import fix), `/compact`, `claude --continue`, `/clear` and `/export`.
 
 ### Part 2: Explore, Plan, Implement, Commit (15 pts), feature F1 listing search
 
