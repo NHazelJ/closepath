@@ -79,11 +79,14 @@ export function searchListings(
     }
     return diff !== 0 ? diff : a.id.localeCompare(b.id);
   });
+  const pageCount = Math.ceil(sorted.length / PAGE_SIZE);
+  const page = Math.min(Math.max(Math.trunc(query.page), 1), Math.max(pageCount, 1));
+  const start = (page - 1) * PAGE_SIZE;
   return {
-    items: sorted,
+    items: sorted.slice(start, start + PAGE_SIZE),
     total: matches.length,
-    page: 1,
-    pageCount: 1,
+    page,
+    pageCount,
     pageSize: PAGE_SIZE,
     isEmpty: false,
   };
