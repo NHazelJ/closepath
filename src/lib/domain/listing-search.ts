@@ -88,6 +88,6 @@ export function searchListings(
     page,
     pageCount,
     pageSize: PAGE_SIZE,
-    isEmpty: false,
+    isEmpty: matches.length === 0,
   };
 }
