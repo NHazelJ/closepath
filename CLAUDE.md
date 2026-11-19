@@ -28,7 +28,7 @@ Read these when needed (not imported):
 | `npm run build` | Production build | ready |
 | `npm run lint` | ESLint (flat config, `next/core-web-vitals` + TypeScript) | ready |
 | `npm run typecheck` | `tsc --noEmit` | ready |
-| `npm test` / `npm run test:watch` / `npm run test:coverage` | Vitest | added with Vitest |
+| `npm test` / `npm run test:watch` / `npm run test:coverage` | Vitest (`vitest.config.ts`, 70% coverage thresholds) | ready |
 | `npm run test:e2e` | Playwright | added with Playwright |
 | `npm run format` | Prettier | added with Prettier |
 | `npx prisma migrate dev` / `npm run db:seed` | Database migrations and demo data | added with Prisma |
