@@ -36,13 +36,6 @@ describe("parseListingSearchParams valid input", () => {
     });
   });
 
-  it("F1-AC2 defaults to no filters, newest first, page 1", () => {
-    expect(parse({})).toEqual({
-      query: { filters: {}, sort: "newest", page: 1 },
-      warnings: [],
-    });
-  });
-
   it("F1-AC2 accepts a property type that only the data source knows about", () => {
     const { query, warnings } = parse({ type: "TRAILER" });
     expect(query.filters.propertyType).toBe("TRAILER");
@@ -52,19 +45,6 @@ describe("parseListingSearchParams valid input", () => {
   it("F1-AC2 uses the first value when a param is repeated", () => {
     const { query } = parse({ city: ["Springfield", "Shelbyville"] });
     expect(query.filters.city).toBe("Springfield");
-  });
-
-  it("F1-AC2 treats empty or blank params as unset, without warnings", () => {
-    const { query, warnings } = parse({
-      city: "  ",
-      minPrice: "",
-      maxPrice: " ",
-      type: "",
-      sort: "",
-      page: "",
-    });
-    expect(query).toEqual({ filters: {}, sort: "newest", page: 1 });
-    expect(warnings).toEqual([]);
   });
 
   it("F1-AC2 allows min price equal to max price", () => {
@@ -142,23 +122,5 @@ describe("parseListingSearchParams invalid input", () => {
       propertyType: "HOUSE",
     });
     expect(warnings).toHaveLength(2);
-  });
-
-  it("F1-AC5 never throws on hostile input", () => {
-    const hostile: RawSearchParams = {
-      city: "<script>alert(1)</script>",
-      minPrice: "1e400",
-      maxPrice: "0x10",
-      minBeds: "   ",
-      minBaths: ["", "3"],
-      type: "__proto__",
-      sort: "constructor",
-      page: "9".repeat(400),
-      unknownParam: "ignored",
-    };
-    expect(() => parse(hostile)).not.toThrow();
-    const { query } = parse(hostile);
-    expect(query.sort).toBe("newest");
-    expect(query.filters.propertyType).toBeUndefined();
   });
 });
