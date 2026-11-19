@@ -47,6 +47,22 @@ describe("parseListingSearchParams valid input", () => {
     expect(query.filters.city).toBe("Springfield");
   });
 
+  it("F1-AC2 treats empty or blank params as unset, without warnings", () => {
+    // A filter form submits untouched fields as empty strings (?minPrice=).
+    const { query, warnings } = parse({
+      city: "  ",
+      minPrice: "",
+      maxPrice: " ",
+      minBeds: "",
+      minBaths: ["", "3"],
+      type: "",
+      sort: "",
+      page: "",
+    });
+    expect(query).toEqual({ filters: {}, sort: "newest", page: 1 });
+    expect(warnings).toEqual([]);
+  });
+
   it("F1-AC2 allows min price equal to max price", () => {
     const { query, warnings } = parse({ minPrice: "500000", maxPrice: "500000" });
     expect(query.filters).toEqual({ minPrice: 500_000, maxPrice: 500_000 });
