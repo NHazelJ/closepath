@@ -1,0 +1,35 @@
+# Local PostgreSQL for development and integration tests (ADR-12 in docs/architecture.md).
+#
+#   docker compose up -d     start it (Docker Desktop must be running)
+#   docker compose ps        check that it is "healthy"
+#   docker compose down      stop it (data is kept in the pgdata volume)
+#   docker compose down -v   stop it and delete all local data
+#
+# Postgres 18 matches Neon's default version for new projects.
+# The user and password are local-only, not secrets: the port is bound to
+# 127.0.0.1, so nothing outside this computer can connect. Neon uses its own
+# credentials, which live only in env vars.
+name: closepath
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: closepath
+      POSTGRES_PASSWORD: closepath
+      POSTGRES_DB: closepath_dev
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # Postgres 18 images keep data under /var/lib/postgresql/18/docker.
+      - pgdata:/var/lib/postgresql
+      # Runs once, on first start with an empty volume: creates closepath_test.
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U closepath -d closepath_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# placeholders only, no real values
+!.env.example
 
 # claude code: personal overrides (the shared .claude/settings.json is committed)
 .claude/settings.local.json
