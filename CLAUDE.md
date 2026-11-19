@@ -28,10 +28,10 @@ Read these when needed (not imported):
 | `npm run build` | Production build | ready |
 | `npm run lint` | ESLint (flat config, `next/core-web-vitals` + TypeScript) | ready |
 | `npm run typecheck` | `tsc --noEmit` | ready |
-| `docker compose up -d` / `docker compose down` | Start or stop the local PostgreSQL 18 (`closepath_dev` and `closepath_test`). Docker Desktop must be running. `down -v` also deletes the data | ready |
 | `npm test` / `npm run test:watch` / `npm run test:coverage` | Vitest | added with Vitest |
 | `npm run test:e2e` | Playwright | added with Playwright |
 | `npm run format` | Prettier | added with Prettier |
+| `docker compose up -d` / `docker compose down` | Start or stop the local PostgreSQL 18 (`closepath_dev` and `closepath_test`). Docker Desktop must be running. `down -v` also deletes the data | ready |
 | `npx prisma migrate dev` / `npm run db:seed` | Database migrations and demo data | added with Prisma |
 
 Do not run a command marked "added with ..." until it exists in `package.json`.
