@@ -138,6 +138,7 @@ Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4 + shadcn/ui
 ## Don't
 
 - Don't read, print, or commit `.env*` files, tokens or keys. Use `.env.example` for placeholders.
+- Don't loosen `.claude/settings.json` (the allow, ask and deny lists and the sandbox; see `docs/security.md`) to get past a prompt or a block. Personal overrides go in `.claude/settings.local.json`, which is git-ignored.
 - Don't add paid services or API calls, including in-app AI or Anthropic API calls in app code. The project must cost $0.
 - Don't install beta, RC, canary or alpha packages. Use the newest stable release (see Stack).
 - Don't create `middleware.ts`, and don't rely on `proxy.ts` for authorization.
@@ -164,3 +165,4 @@ Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4 + shadcn/ui
   - Added architecture rules, conventions, the TDD strategy, git workflow, the OWASP Top 10:2025 summary, do's and don'ts, and context management.
   - Added the team rule: stable package releases only (no beta or RC).
   - Removed the starter-template details that /init documented (fonts, default page), since they will be replaced.
+- **v2.1** (Nov 18): added the shared permissions file (`.claude/settings.json`) and the rule not to loosen it.

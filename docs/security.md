@@ -11,7 +11,7 @@ ClosePath stores personal data (names, emails and phone numbers of leads and hom
 | # | Risk | How ClosePath handles it |
 |---|---|---|
 | A01 | Broken Access Control | Every read and write goes through the DAL (`src/server/`). It checks the session, the role and ownership (an agent's own leads only). IDs from the client are never trusted. Integration tests cover "wrong role" and "someone else's lead" for each feature. `proxy.ts` is never the only check. |
-| A02 | Security Misconfiguration | Secrets live only in Vercel and GitHub env vars, and `.env*` is git-ignored. Security headers (CSP, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors`) are set in `next.config.ts`. No debug output or stack traces in production. Claude Code is denied access to `.env*` files. |
+| A02 | Security Misconfiguration | Secrets live only in Vercel and GitHub env vars, and `.env*` is git-ignored. Security headers (CSP, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors`) are set in `next.config.ts`. No debug output or stack traces in production. Claude Code is denied access to `.env` files (see [Claude Code permissions](#claude-code-permissions)). |
 | A03 | Software Supply Chain Failures | `package-lock.json` is committed and CI uses `npm ci`. `npm audit` runs in CI and Dependabot alerts are on. GitHub Actions are pinned to versions. New dependencies need a reason in the PR. |
 | A04 | Cryptographic Failures | HTTPS everywhere (Vercel). Better Auth hashes passwords (scrypt). Session cookies are `httpOnly`, `Secure` and `SameSite=Lax`. Secrets are random and at least 32 bytes. Unsubscribe links use signed tokens. |
 | A05 | Injection | Prisma parameterizes every query. `$queryRawUnsafe` is banned. Zod validates all input on the server. React escapes output. `dangerouslySetInnerHTML` is banned. Email templates escape the values they fill in. |
@@ -35,6 +35,23 @@ Project 3 needs at least 4. We plan 6:
 | 6 | **OWASP Top 10 awareness** | This file, summarized in `CLAUDE.md` | Guides every change |
 
 A full `npm audit`, including dev dependencies, also runs in CI as a report-only step, so nothing is hidden.
+
+## Claude Code permissions
+
+`.claude/settings.json` is committed and shared by the team. It sets what Claude Code may do in this repo.
+
+| List | What's in it | Effect |
+|---|---|---|
+| **allow** | Checks and tests (`npm run lint`, `typecheck`, `build`, `test*`), read-only git and `gh` commands, local `git add` and `git commit`, edits in `src/`, `e2e/`, `docs/` and the seed files, and fetching from a short list of docs sites | Runs without a prompt |
+| **ask** | Installing or removing packages, Prisma migrations and `db` commands, `git push`, merge, rebase, hard reset and amend, creating, commenting on or merging PRs, `gh api`, Vercel, `Remove-Item`, and edits to `package.json`, the Prisma schema and migrations, `.github/`, `.claude/settings.json`, `.mcp.json`, `next.config.ts` and `vercel.json` | Always prompts, even when an allow rule also matches |
+| **deny** | Reading or editing `.env` files (`.env.example` stays readable), `*.pem` files, and secrets in the home folder (`~/.ssh`, `~/.aws`, the gh and npm tokens, Claude's own credentials). Also `rm -rf`, `Remove-Item -Recurse`, force-pushes, pushes to `main` or `dev`, `--no-verify`, `git filter-branch`, `npm publish`, and installing beta, RC, canary, alpha or `@next` versions (ADR-0) | Blocked |
+
+- **Order:** deny wins over ask, and ask wins over allow.
+- **Both shells:** every shell rule is listed for Bash and for PowerShell, because Claude Code on Windows can use either.
+- **Limits:** the `.env` deny rules also cover `cat`, `head` and similar shell commands, but not a script that opens the file itself. A PreToolUse hook (Project 3 hooks item) will close that gap.
+- **Sandbox:** `sandbox.enabled` is on. On macOS, Linux and WSL2, every command not in `excludedCommands` runs in an OS sandbox. It can only write inside the project, can't read the denied files, and must ask before reaching a new network host. npm, npx, git remote commands, `gh` and Vercel are excluded, because they need the network, the npm cache or the database. Native Windows has no sandbox yet: Claude Code prints "Sandbox disabled" at startup, and the permission rules are the guard.
+- **Personal overrides** go in `.claude/settings.local.json`, which is git-ignored. Don't loosen the shared file to get past a prompt.
+- **Tested (Nov 18):** in a headless `claude -p` run in this repo, `git status` ran, and `git commit --no-verify` and `git push --force` were blocked. The commit is allowed by `git commit *`, so the block shows the deny rule wins.
 
 ## Known advisories
 
