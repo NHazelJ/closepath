@@ -106,7 +106,7 @@ Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4 + shadcn/ui
 - **PRs:**
   - Target `dev`.
   - Merge with a **merge commit only** (squash is disabled so red, green and refactor commits stay in history).
-  - Every PR description includes **AI disclosure**: % AI-generated, tool used, and what the human reviewed.
+  - Every PR description ends with an **AI disclosure** section: the line "Co-authored with Claude Opus 5.5 (Claude Code).", then the three fields the course asks for: **AI-generated** (approximate %), **Tool**, and **Human review** (what the human did or checked).
   - Selected PRs get a C.L.E.A.R. review from the partner.
 - **Commit email:** commit with the GitHub `noreply` email; never a personal address.
 
@@ -169,3 +169,4 @@ Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4 + shadcn/ui
   - Removed the starter-template details that /init documented (fonts, default page), since they will be replaced.
 - **v2.1** (Nov 18): added the shared permissions file (`.claude/settings.json`) and the rule not to loosen it.
 - **v2.2** (Nov 18): fixed the `@imports`. Each path had a colon right after it (`@AGENTS.md:`), which Claude Code read as part of the file name, so none of the 5 files loaded. Found because `/context` listed only `CLAUDE.md` (4.4k tokens) under memory files; a headless test confirmed it before and after the fix.
+- **v2.3** (Nov 18): set the PR AI-disclosure format: a co-author line, then AI-generated, Tool and Human review.
