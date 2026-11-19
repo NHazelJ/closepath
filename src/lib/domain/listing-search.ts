@@ -68,8 +68,19 @@ export function searchListings(
       (minBaths === undefined || l.baths >= minBaths) &&
       (propertyType === undefined || l.propertyType === propertyType),
   );
+  const sorted = [...matches].sort((a, b) => {
+    let diff = 0;
+    if (query.sort === "newest") {
+      diff = b.listedAt.getTime() - a.listedAt.getTime();
+    } else if (query.sort === "price_asc") {
+      diff = a.price - b.price;
+    } else {
+      diff = b.price - a.price;
+    }
+    return diff !== 0 ? diff : a.id.localeCompare(b.id);
+  });
   return {
-    items: matches,
+    items: sorted,
     total: matches.length,
     page: 1,
     pageCount: 1,
