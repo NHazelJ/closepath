@@ -132,3 +132,62 @@ describe("searchListings filters", () => {
     expect(ids(narrower.items)).toEqual([springfieldHouse.id]);
   });
 });
+
+describe("searchListings sorting", () => {
+  const older = makeListing({
+    price: 600_000,
+    listedAt: new Date("2026-10-01T00:00:00Z"),
+  });
+  const newer = makeListing({
+    price: 300_000,
+    listedAt: new Date("2026-11-10T00:00:00Z"),
+  });
+  const middle = makeListing({
+    price: 450_000,
+    listedAt: new Date("2026-10-20T00:00:00Z"),
+  });
+  const all = [older, newer, middle];
+
+  it("F1-AC3 sorts newest first", () => {
+    const result = searchListings(all, query({ sort: "newest" }));
+    expect(result.items.map((l) => l.id)).toEqual([
+      newer.id,
+      middle.id,
+      older.id,
+    ]);
+  });
+
+  it("F1-AC3 sorts by price low to high", () => {
+    const result = searchListings(all, query({ sort: "price_asc" }));
+    expect(result.items.map((l) => l.id)).toEqual([
+      newer.id,
+      middle.id,
+      older.id,
+    ]);
+  });
+
+  it("F1-AC3 sorts by price high to low", () => {
+    const result = searchListings(all, query({ sort: "price_desc" }));
+    expect(result.items.map((l) => l.id)).toEqual([
+      older.id,
+      middle.id,
+      newer.id,
+    ]);
+  });
+
+  it("F1-AC3 breaks ties by id so order is deterministic", () => {
+    const sameDay = new Date("2026-11-05T00:00:00Z");
+    const b = makeListing({ id: "b", price: 500_000, listedAt: sameDay });
+    const a = makeListing({ id: "a", price: 500_000, listedAt: sameDay });
+    for (const sort of ["newest", "price_asc", "price_desc"] as const) {
+      const result = searchListings([b, a], query({ sort }));
+      expect(result.items.map((l) => l.id)).toEqual(["a", "b"]);
+    }
+  });
+
+  it("F1-AC3 does not mutate the input array", () => {
+    const input = [older, newer, middle];
+    searchListings(input, query({ sort: "price_desc" }));
+    expect(input).toEqual([older, newer, middle]);
+  });
+});
