@@ -51,39 +51,63 @@ export type ListingSearchResult = {
   isEmpty: boolean;
 };
 
+const normalizeCity = (city: string) => city.trim().toLowerCase();
+
+/** True when the listing is active and satisfies every filter that is set. */
+export function matchesFilters(
+  listing: ListingSummary,
+  filters: ListingFilters,
+): boolean {
+  const { city, minPrice, maxPrice, minBeds, minBaths, propertyType } = filters;
+  const cityNeedle = city === undefined ? "" : normalizeCity(city);
+  return (
+    listing.status === "ACTIVE" &&
+    (cityNeedle === "" || normalizeCity(listing.city) === cityNeedle) &&
+    (minPrice === undefined || listing.price >= minPrice) &&
+    (maxPrice === undefined || listing.price <= maxPrice) &&
+    (minBeds === undefined || listing.beds >= minBeds) &&
+    (minBaths === undefined || listing.baths >= minBaths) &&
+    (propertyType === undefined || listing.propertyType === propertyType)
+  );
+}
+
+const PRIMARY_ORDER: Record<
+  SortOption,
+  (a: ListingSummary, b: ListingSummary) => number
+> = {
+  newest: (a, b) => b.listedAt.getTime() - a.listedAt.getTime(),
+  price_asc: (a, b) => a.price - b.price,
+  price_desc: (a, b) => b.price - a.price,
+};
+
+/** Comparator for a sort option, with ties broken by id (locale-independent). */
+export function compareBy(
+  sort: SortOption,
+): (a: ListingSummary, b: ListingSummary) => number {
+  const primary = PRIMARY_ORDER[sort];
+  return (a, b) => {
+    const diff = primary(a, b);
+    if (diff !== 0) return diff;
+    if (a.id === b.id) return 0;
+    return a.id < b.id ? -1 : 1;
+  };
+}
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
+
 export function searchListings(
   listings: readonly ListingSummary[],
   query: ListingQuery,
 ): ListingSearchResult {
-  const { city, minPrice, maxPrice, minBeds, minBaths, propertyType } =
-    query.filters;
-  const cityNeedle = city?.trim().toLowerCase();
-  const matches = listings.filter(
-    (l) =>
-      l.status === "ACTIVE" &&
-      (!cityNeedle || l.city.trim().toLowerCase() === cityNeedle) &&
-      (minPrice === undefined || l.price >= minPrice) &&
-      (maxPrice === undefined || l.price <= maxPrice) &&
-      (minBeds === undefined || l.beds >= minBeds) &&
-      (minBaths === undefined || l.baths >= minBaths) &&
-      (propertyType === undefined || l.propertyType === propertyType),
-  );
-  const sorted = [...matches].sort((a, b) => {
-    let diff = 0;
-    if (query.sort === "newest") {
-      diff = b.listedAt.getTime() - a.listedAt.getTime();
-    } else if (query.sort === "price_asc") {
-      diff = a.price - b.price;
-    } else {
-      diff = b.price - a.price;
-    }
-    return diff !== 0 ? diff : a.id.localeCompare(b.id);
-  });
-  const pageCount = Math.ceil(sorted.length / PAGE_SIZE);
-  const page = Math.min(Math.max(Math.trunc(query.page), 1), Math.max(pageCount, 1));
+  const matches = listings
+    .filter((listing) => matchesFilters(listing, query.filters))
+    .sort(compareBy(query.sort));
+  const pageCount = Math.ceil(matches.length / PAGE_SIZE);
+  const page = clamp(Math.trunc(query.page), 1, Math.max(pageCount, 1));
   const start = (page - 1) * PAGE_SIZE;
   return {
-    items: sorted.slice(start, start + PAGE_SIZE),
+    items: matches.slice(start, start + PAGE_SIZE),
     total: matches.length,
     page,
     pageCount,
