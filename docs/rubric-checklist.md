@@ -2,7 +2,7 @@
 
 Every graded item for HW4 and Project 3, and where its evidence lives. Check items off in the same PR that completes them.
 
-Sources: the Canvas rubrics and the course's [Project 3 page](https://github.com/john-guerra/ai-coding-class/blob/main/course/projects/project3-team-app.md), which has the detailed point breakdown.
+Sources: the Canvas rubrics, the course's [HW4 page](https://github.com/john-guerra/ai-coding-class/blob/main/course/assignments/hw4-claude-code-workflow-tdd.md), and its [Project 3 page](https://github.com/john-guerra/ai-coding-class/blob/main/course/projects/project3-team-app.md), which has the detailed point breakdown. Both were re-checked on Nov 19.
 
 ## Deadlines
 
@@ -22,9 +22,17 @@ Sources: the Canvas rubrics and the course's [Project 3 page](https://github.com
 - [x] **Permissions:** allow, ask and deny lists plus the sandbox in `.claude/settings.json`. Explained and tested in `docs/security.md` ("Claude Code permissions"). Screenshots: `docs/screenshots/hw4-permissions-*.png`.
 - [x] **Context management strategy:** `docs/context-management.md`, with screenshots of `/context` (before and after the import fix), `/compact`, `claude --continue`, `/clear` and `/export`.
 
-### Part 2: Explore, Plan, Implement, Commit (15 pts), feature F1 listing search
+### Part 2: Spec, then Explore, Plan, Implement, Commit (15 pts), feature F1 listing search
 
-- [ ] Explore with Glob, Grep and Read (session log).
+- [ ] **Spec interview:** Claude Code interviews us with the AskUserQuestion tool, then writes `SPEC.md` (session log).
+- [ ] **`SPEC.md` is committed before the first F1 implementation commit.** The git history must show this order. The Prisma schema for listings counts as F1 implementation.
+- [ ] **The spec meets all four criteria:**
+  - self-contained;
+  - names the files and interfaces involved;
+  - states what is out of scope;
+  - ends with an end-to-end verification step that proves the feature works.
+- [ ] `/clear`, then implement from the spec alone.
+- [ ] For each plan item: explore with Glob, Grep and Read (session log).
 - [ ] Plan in Plan mode (session log and screenshot).
 - [ ] Implement from the plan.
 - [ ] 3+ commits that show the workflow.
@@ -38,7 +46,10 @@ Sources: the Canvas rubrics and the course's [Project 3 page](https://github.com
 
 ### Part 4: Reflection (7.5 pts)
 
-- [ ] 1 to 2 page reflection in `docs/reflections/hw4-reflection.md`.
+- [ ] 1 to 2 page reflection in `docs/reflections/hw4-reflection.md`. It answers:
+  - how Explore, Plan, Implement, Commit compares to our previous approach;
+  - **whether writing the spec changed what we built**, pointing to one concrete thing the interview surfaced that we would otherwise have found late;
+  - which context management strategies worked best.
 - [ ] Annotated session log in `docs/session-logs/`.
 
 ## Project 3 (200 pts + up to 6 bonus)
