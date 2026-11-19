@@ -51,7 +51,9 @@ A full `npm audit`, including dev dependencies, also runs in CI as a report-only
 - **Limits:** the `.env` deny rules also cover `cat`, `head` and similar shell commands, but not a script that opens the file itself. A PreToolUse hook (Project 3 hooks item) will close that gap.
 - **Sandbox:** `sandbox.enabled` is on. On macOS, Linux and WSL2, every command not in `excludedCommands` runs in an OS sandbox. It can only write inside the project, can't read the denied files, and must ask before reaching a new network host. npm, npx, git remote commands, `gh` and Vercel are excluded, because they need the network, the npm cache or the database. Native Windows has no sandbox yet: Claude Code prints "Sandbox disabled" at startup, and the permission rules are the guard.
 - **Personal overrides** go in `.claude/settings.local.json`, which is git-ignored. Don't loosen the shared file to get past a prompt.
-- **Tested (Nov 18):** in a headless `claude -p` run in this repo, `git status` ran, and `git commit --no-verify` and `git push --force` were blocked. The commit is allowed by `git commit *`, so the block shows the deny rule wins.
+- **Tested (Nov 18):**
+  - In a headless `claude -p` run (Bash tool), `git status` ran, and `git commit --no-verify` and `git push --force` were blocked. The commit is allowed by `git commit *`, so the block shows the deny rule wins.
+  - In an interactive session, `/permissions` lists the rules ([Allow](screenshots/hw4-permissions-allow.png), [Deny](screenshots/hw4-permissions-deny.png)). `git push --force --dry-run` through the PowerShell tool was [denied](screenshots/hw4-permissions-blocked.png), so the PowerShell copies of the rules work too.
 
 ## Known advisories
 
