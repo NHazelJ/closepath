@@ -233,3 +233,25 @@ describe("searchListings pagination", () => {
     expect(below.items[0]?.price).toBe(1);
   });
 });
+
+describe("searchListings empty results", () => {
+  it("F1-AC4 flags an empty result when nothing matches", () => {
+    const result = searchListings(
+      [makeListing({ city: "Springfield" })],
+      query({ filters: { city: "Nowhere" } }),
+    );
+    expect(result.isEmpty).toBe(true);
+    expect(result.total).toBe(0);
+    expect(result.items).toEqual([]);
+    expect(result.page).toBe(1);
+    expect(result.pageCount).toBe(0);
+  });
+
+  it("F1-AC4 flags an empty result when there are no listings", () => {
+    expect(searchListings([], query()).isEmpty).toBe(true);
+  });
+
+  it("F1-AC4 is not empty when something matches", () => {
+    expect(searchListings([makeListing()], query()).isEmpty).toBe(false);
+  });
+});
