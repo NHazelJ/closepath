@@ -6,11 +6,13 @@ Guidance for Claude Code in the **ClosePath** repo: a free, front-office app for
 
 These files load into every session. Keep them accurate.
 
-- @AGENTS.md: this Next.js version has breaking changes. Read `node_modules/next/dist/docs/` before using any Next.js API.
-- @docs/PRD.md: roles, the five features (F1 to F5), acceptance criteria (`F2-AC5` and so on), Definition of Done.
-- @docs/architecture.md: stack, ADRs, data model, folder layout, environments.
-- @docs/testing.md: TDD loop, commit convention, test pyramid, coverage rules.
-- @docs/security.md: OWASP Top 10:2025 mapping, security gates, known advisories.
+- @AGENTS.md (this Next.js version has breaking changes; read `node_modules/next/dist/docs/` before using any Next.js API)
+- @docs/PRD.md (roles, the five features F1 to F5, acceptance criteria such as `F2-AC5`, Definition of Done)
+- @docs/architecture.md (stack, ADRs, data model, folder layout, environments)
+- @docs/testing.md (TDD loop, commit convention, test pyramid, coverage rules)
+- @docs/security.md (OWASP Top 10:2025 mapping, security gates, known advisories)
+
+Keep a space after each import path. Punctuation touching the path (such as `@docs/PRD.md:`) becomes part of the file name, and the import silently fails.
 
 Read these when needed (not imported):
 
@@ -166,3 +168,4 @@ Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4 + shadcn/ui
   - Added the team rule: stable package releases only (no beta or RC).
   - Removed the starter-template details that /init documented (fonts, default page), since they will be replaced.
 - **v2.1** (Nov 18): added the shared permissions file (`.claude/settings.json`) and the rule not to loosen it.
+- **v2.2** (Nov 18): fixed the `@imports`. Each path had a colon right after it (`@AGENTS.md:`), which Claude Code read as part of the file name, so none of the 5 files loaded. Found because `/context` listed only `CLAUDE.md` (4.4k tokens) under memory files; a headless test confirmed it before and after the fix.

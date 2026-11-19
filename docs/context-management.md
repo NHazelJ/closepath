@@ -4,7 +4,7 @@ Claude Code's context window holds the conversation, every file it reads, and `C
 
 ## What every session starts with
 
-- **`CLAUDE.md` plus 5 imports:** `AGENTS.md`, `docs/PRD.md`, `docs/architecture.md`, `docs/testing.md` and `docs/security.md`. They load into every session, so we keep them short and accurate.
+- **`CLAUDE.md` plus 5 imports:** `AGENTS.md`, `docs/PRD.md`, `docs/architecture.md`, `docs/testing.md` and `docs/security.md`. They load into every session, so we keep them short and accurate. To check, run `/context`: under memory files it should list `CLAUDE.md` and the imported files. (An early version had a colon right after each path, `@AGENTS.md:`, which made all 5 imports silently fail. `/context` is how we caught it.)
 - **Read-when-needed files:** this file, the sprint notes, the standups and the rubric checklist are referenced by path in `CLAUDE.md`, not imported, so they don't use space until Claude opens them.
 - **`.claude/settings.json`:** the shared permission rules (see [security.md](security.md#claude-code-permissions)). These are rules, not conversation, so they use no context.
 - **Auto-memory:** Claude Code keeps short personal notes per project in `~/.claude/projects/<project>/memory/`, such as "stable releases only". That folder is personal and not committed, so team rules always go in `CLAUDE.md` instead.
