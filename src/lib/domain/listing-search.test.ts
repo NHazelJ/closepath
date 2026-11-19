@@ -9,9 +9,11 @@ import {
 const HOUSE = "HOUSE";
 const CONDO = "CONDO";
 
-let nextId = 1;
-function makeListing(overrides: Partial<ListingSummary> = {}): ListingSummary {
-  const id = String(nextId++).padStart(3, "0");
+/** A fictional active listing; every test passes its own id. */
+function makeListing(
+  id: string,
+  overrides: Partial<ListingSummary> = {},
+): ListingSummary {
   return {
     id,
     address: `${id} Example St`,
@@ -37,81 +39,91 @@ function ids(listings: readonly ListingSummary[]): string[] {
 }
 
 describe("searchListings filters", () => {
-  const springfieldHouse = makeListing({ city: "Springfield", price: 400_000 });
-  const shelbyvilleCondo = makeListing({
-    city: "Shelbyville",
-    propertyType: CONDO,
-    price: 300_000,
-    beds: 2,
-    baths: 1,
-  });
-  const bigHouse = makeListing({ price: 900_000, beds: 5, baths: 3.5 });
-  const soldHouse = makeListing({ status: "SOLD" });
-  const pendingHouse = makeListing({ status: "PENDING" });
-  const all = [
-    springfieldHouse,
-    shelbyvilleCondo,
-    bigHouse,
-    soldHouse,
-    pendingHouse,
-  ];
-
   it("F1-AC1 returns only ACTIVE listings", () => {
-    const result = searchListings(all, query());
-    expect(ids(result.items)).toEqual(
-      ids([springfieldHouse, shelbyvilleCondo, bigHouse]),
-    );
-    expect(result.total).toBe(3);
+    const active = makeListing("active");
+    const sold = makeListing("sold", { status: "SOLD" });
+    const pending = makeListing("pending", { status: "PENDING" });
+    const result = searchListings([active, sold, pending], query());
+    expect(ids(result.items)).toEqual(["active"]);
+    expect(result.total).toBe(1);
   });
 
   it("F1-AC2 filters by city, ignoring case and surrounding spaces", () => {
+    const shelbyville = makeListing("shelbyville", { city: "Shelbyville" });
+    const springfield = makeListing("springfield", { city: "Springfield" });
     const result = searchListings(
-      all,
+      [shelbyville, springfield],
       query({ filters: { city: "  shelbyVILLE " } }),
     );
-    expect(ids(result.items)).toEqual([shelbyvilleCondo.id]);
+    expect(ids(result.items)).toEqual(["shelbyville"]);
   });
 
   it("F1-AC2 filters by min price (inclusive)", () => {
+    const atMin = makeListing("at-min", { price: 400_000 });
+    const below = makeListing("below", { price: 399_999 });
     const result = searchListings(
-      all,
+      [atMin, below],
       query({ filters: { minPrice: 400_000 } }),
     );
-    expect(ids(result.items)).toEqual(ids([springfieldHouse, bigHouse]));
+    expect(ids(result.items)).toEqual(["at-min"]);
   });
 
   it("F1-AC2 filters by max price (inclusive)", () => {
+    const atMax = makeListing("at-max", { price: 400_000 });
+    const above = makeListing("above", { price: 400_001 });
     const result = searchListings(
-      all,
+      [atMax, above],
       query({ filters: { maxPrice: 400_000 } }),
     );
-    expect(ids(result.items)).toEqual(
-      ids([springfieldHouse, shelbyvilleCondo]),
-    );
+    expect(ids(result.items)).toEqual(["at-max"]);
   });
 
   it("F1-AC2 filters by min beds", () => {
-    const result = searchListings(all, query({ filters: { minBeds: 4 } }));
-    expect(ids(result.items)).toEqual([bigHouse.id]);
+    const fiveBeds = makeListing("five-beds", { beds: 5 });
+    const threeBeds = makeListing("three-beds", { beds: 3 });
+    const result = searchListings(
+      [fiveBeds, threeBeds],
+      query({ filters: { minBeds: 4 } }),
+    );
+    expect(ids(result.items)).toEqual(["five-beds"]);
   });
 
   it("F1-AC2 filters by min baths, allowing half baths", () => {
-    const result = searchListings(all, query({ filters: { minBaths: 2.5 } }));
-    expect(ids(result.items)).toEqual([bigHouse.id]);
+    const threeAndHalf = makeListing("three-and-half", { baths: 3.5 });
+    const two = makeListing("two", { baths: 2 });
+    const result = searchListings(
+      [threeAndHalf, two],
+      query({ filters: { minBaths: 2.5 } }),
+    );
+    expect(ids(result.items)).toEqual(["three-and-half"]);
   });
 
   it("F1-AC2 filters by property type supplied by the data", () => {
-    const trailer = makeListing({ propertyType: "TRAILER" });
+    const trailer = makeListing("trailer", { propertyType: "TRAILER" });
+    const house = makeListing("house", { propertyType: HOUSE });
     const result = searchListings(
-      [...all, trailer],
+      [trailer, house],
       query({ filters: { propertyType: "TRAILER" } }),
     );
-    expect(ids(result.items)).toEqual([trailer.id]);
+    expect(ids(result.items)).toEqual(["trailer"]);
   });
 
-  it("F1-AC2 combines every filter so results match all of them", () => {
+  it("F1-AC2 with every filter set, returns only listings that match all of them", () => {
+    const smallHouse = makeListing("small-house", { price: 400_000 });
+    const bigHouse = makeListing("big-house", {
+      price: 900_000,
+      beds: 5,
+      baths: 3.5,
+    });
+    const shelbyvilleCondo = makeListing("shelbyville-condo", {
+      city: "Shelbyville",
+      propertyType: CONDO,
+      price: 300_000,
+      beds: 2,
+      baths: 1,
+    });
     const result = searchListings(
-      all,
+      [smallHouse, bigHouse, shelbyvilleCondo],
       query({
         filters: {
           city: "Springfield",
@@ -123,26 +135,38 @@ describe("searchListings filters", () => {
         },
       }),
     );
-    expect(ids(result.items)).toEqual(ids([springfieldHouse, bigHouse]));
+    expect(ids(result.items)).toEqual(["big-house", "small-house"]);
+  });
 
-    const narrower = searchListings(
-      all,
+  it("F1-AC2 with two filters set, excludes a listing that fails either one", () => {
+    const cheapSpringfield = makeListing("cheap-springfield", {
+      price: 400_000,
+    });
+    const pricySpringfield = makeListing("pricy-springfield", {
+      price: 900_000,
+    });
+    const cheapShelbyville = makeListing("cheap-shelbyville", {
+      city: "Shelbyville",
+      price: 300_000,
+    });
+    const result = searchListings(
+      [cheapSpringfield, pricySpringfield, cheapShelbyville],
       query({ filters: { city: "Springfield", maxPrice: 500_000 } }),
     );
-    expect(ids(narrower.items)).toEqual([springfieldHouse.id]);
+    expect(ids(result.items)).toEqual(["cheap-springfield"]);
   });
 });
 
 describe("searchListings sorting", () => {
-  const older = makeListing({
+  const older = makeListing("older", {
     price: 600_000,
     listedAt: new Date("2026-10-01T00:00:00Z"),
   });
-  const newer = makeListing({
+  const newer = makeListing("newer", {
     price: 300_000,
     listedAt: new Date("2026-11-10T00:00:00Z"),
   });
-  const middle = makeListing({
+  const middle = makeListing("middle", {
     price: 450_000,
     listedAt: new Date("2026-10-20T00:00:00Z"),
   });
@@ -177,8 +201,8 @@ describe("searchListings sorting", () => {
 
   it("F1-AC3 breaks ties by id so order is deterministic", () => {
     const sameDay = new Date("2026-11-05T00:00:00Z");
-    const b = makeListing({ id: "b", price: 500_000, listedAt: sameDay });
-    const a = makeListing({ id: "a", price: 500_000, listedAt: sameDay });
+    const b = makeListing("b", { price: 500_000, listedAt: sameDay });
+    const a = makeListing("a", { price: 500_000, listedAt: sameDay });
     for (const sort of ["newest", "price_asc", "price_desc"] as const) {
       const result = searchListings([b, a], query({ sort }));
       expect(result.items.map((l) => l.id)).toEqual(["a", "b"]);
@@ -189,7 +213,7 @@ describe("searchListings sorting", () => {
 describe("searchListings pagination", () => {
   // 45 listings, prices 1..45 so price_asc order is predictable.
   const many = Array.from({ length: 45 }, (_, i) =>
-    makeListing({ price: i + 1 }),
+    makeListing(`page-item-${i + 1}`, { price: i + 1 }),
   );
   const pageOf = (page: number) =>
     searchListings(many, query({ sort: "price_asc", page }));
@@ -225,7 +249,7 @@ describe("searchListings pagination", () => {
 describe("searchListings empty results", () => {
   it("F1-AC4 flags an empty result when nothing matches", () => {
     const result = searchListings(
-      [makeListing({ city: "Springfield" })],
+      [makeListing("springfield", { city: "Springfield" })],
       query({ filters: { city: "Nowhere" } }),
     );
     expect(result.isEmpty).toBe(true);
