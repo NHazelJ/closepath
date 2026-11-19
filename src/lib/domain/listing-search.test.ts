@@ -191,3 +191,45 @@ describe("searchListings sorting", () => {
     expect(input).toEqual([older, newer, middle]);
   });
 });
+
+describe("searchListings pagination", () => {
+  // 45 listings, prices 1..45 so price_asc order is predictable.
+  const many = Array.from({ length: 45 }, (_, i) =>
+    makeListing({ price: i + 1 }),
+  );
+  const pageOf = (page: number) =>
+    searchListings(many, query({ sort: "price_asc", page }));
+
+  it("F1-AC1 returns 20 listings per page", () => {
+    const first = pageOf(1);
+    expect(first.pageSize).toBe(20);
+    expect(first.items).toHaveLength(20);
+    expect(first.items[0]?.price).toBe(1);
+    expect(first.items[19]?.price).toBe(20);
+  });
+
+  it("F1-AC1 reports total and page count across pages", () => {
+    const second = pageOf(2);
+    expect(second.total).toBe(45);
+    expect(second.pageCount).toBe(3);
+    expect(second.page).toBe(2);
+    expect(second.items.map((l) => l.price)[0]).toBe(21);
+  });
+
+  it("F1-AC1 returns the remainder on the last page", () => {
+    const last = pageOf(3);
+    expect(last.items.map((l) => l.price)).toEqual([41, 42, 43, 44, 45]);
+  });
+
+  it("F1-AC1 clamps a page past the end to the last page", () => {
+    const beyond = pageOf(99);
+    expect(beyond.page).toBe(3);
+    expect(beyond.items).toHaveLength(5);
+  });
+
+  it("F1-AC1 clamps a page below 1 to the first page", () => {
+    const below = pageOf(0);
+    expect(below.page).toBe(1);
+    expect(below.items[0]?.price).toBe(1);
+  });
+});
