@@ -46,8 +46,8 @@ Rules:
 
 ## Integration test database
 
-- **CI:** GitHub Actions starts a `postgres` service container. The workflow runs `prisma migrate deploy`, then the tests.
-- **Locally:** a separate Neon branch named `test`, via `DATABASE_URL` in `.env.test`. Never point tests at the production branch.
+- **CI:** GitHub Actions starts a `postgres:18-alpine` service container, the same image as `compose.yaml`. The workflow runs `prisma migrate deploy`, then the tests.
+- **Locally:** the `closepath_test` database in the Docker container (`docker compose up -d`), via `DATABASE_URL` in `.env.test`. It is separate from `closepath_dev`, so tests never wipe the data you use with `npm run dev`. Without Docker, use a Neon branch named `test` instead (see ADR-12 in [architecture.md](architecture.md)). Never point tests at the production database.
 - **Isolation:** each test file resets the tables it uses (truncate) and seeds only the rows it needs.
 
 ## End-to-end flows (Playwright)

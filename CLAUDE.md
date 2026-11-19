@@ -28,6 +28,7 @@ Read these when needed (not imported):
 | `npm run build` | Production build | ready |
 | `npm run lint` | ESLint (flat config, `next/core-web-vitals` + TypeScript) | ready |
 | `npm run typecheck` | `tsc --noEmit` | ready |
+| `docker compose up -d` / `docker compose down` | Start or stop the local PostgreSQL 18 (`closepath_dev` and `closepath_test`). Docker Desktop must be running. `down -v` also deletes the data | ready |
 | `npm test` / `npm run test:watch` / `npm run test:coverage` | Vitest | added with Vitest |
 | `npm run test:e2e` | Playwright | added with Playwright |
 | `npm run format` | Prettier | added with Prettier |
@@ -37,7 +38,9 @@ Do not run a command marked "added with ..." until it exists in `package.json`.
 
 ## Stack
 
-Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4 + shadcn/ui, PostgreSQL on Neon, Prisma 7, Better Auth, Zod, Vitest, Playwright, fast-check, Stryker. Deployed on Vercel. CI runs on GitHub Actions. **Everything must stay free:** no paid APIs or services.
+Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4 + shadcn/ui, PostgreSQL 18 (Neon in the cloud, Docker locally), Prisma 7, Better Auth, Zod, Vitest, Playwright, fast-check, Stryker. Deployed on Vercel. CI runs on GitHub Actions. **Everything must stay free:** no paid APIs or services.
+
+**Database driver:** Prisma uses `@prisma/adapter-pg`, never `@prisma/adapter-neon`. The Neon adapter can't reach the Docker or CI database; the `pg` adapter works with all three, and only `DATABASE_URL` changes (ADR-12).
 
 **Stable releases only.** Never install beta, RC, canary, alpha or `next` versions. Check `npm view <pkg> dist-tags` first, because some `latest` tags point to pre-releases. Example: `prisma`'s `latest` tag is an 8.0 RC, so install `prisma@7` and `@prisma/client@7`.
 
@@ -170,3 +173,4 @@ Next.js 16 (App Router), React 19, TypeScript strict, Tailwind CSS 4 + shadcn/ui
 - **v2.1** (Nov 18): added the shared permissions file (`.claude/settings.json`) and the rule not to loosen it.
 - **v2.2** (Nov 18): fixed the `@imports`. Each path had a colon right after it (`@AGENTS.md:`), which Claude Code read as part of the file name, so none of the 5 files loaded. Found because `/context` listed only `CLAUDE.md` (4.4k tokens) under memory files; a headless test confirmed it before and after the fix.
 - **v2.3** (Nov 18): set the PR AI-disclosure format: a co-author line, then AI-generated, Tool and Human review.
+- **v2.4** (Nov 19): local PostgreSQL 18 in Docker (`compose.yaml`) for development and integration tests, and Prisma's standard `pg` adapter instead of the Neon adapter (ADR-12). Added the Docker commands.

@@ -50,8 +50,8 @@ flowchart LR
 |---|---|---|
 | Framework | Next.js 16 (App Router), React 19, TypeScript (strict) | One full-stack codebase. Course standard. Vercel preview deploys. |
 | UI | Tailwind CSS 4 + shadcn/ui | Accessible components we own and can edit. No runtime CSS cost. |
-| Database | PostgreSQL on Neon (free tier) | Relational data (leads, showings, rules). Free branches for test databases. |
-| ORM | Prisma 7 with the Neon driver adapter | Type-safe queries, migrations, seed script. Queries are parameterized (no SQL injection). Pin `prisma@7`, because npm's `latest` tag for the `prisma` CLI points to an 8.0 release candidate. |
+| Database | PostgreSQL 18: Neon (free tier) in the cloud, Docker on our own computers | Relational data (leads, showings, rules). Neon is free and works with Vercel. Docker gives each of us a local copy for development and tests. See ADR-12. |
+| ORM | Prisma 7 with the standard PostgreSQL driver adapter (`@prisma/adapter-pg`) | Type-safe queries, migrations, seed script. Queries are parameterized (no SQL injection). The same adapter works with Neon, the local Docker database and CI (ADR-12). Pin `prisma@7`, because npm's `latest` tag for the `prisma` CLI points to an 8.0 release candidate. |
 | Auth | Better Auth (email + password, roles) | See ADR-3. |
 | Validation | Zod | One schema validates forms on the client and the server. |
 | Email | Outbox table + Resend free tier (optional) | See ADR-6. |
@@ -64,7 +64,7 @@ flowchart LR
 
 **ADR-1: Next.js 16 App Router as the full stack.** Pages, mutations (Server Actions) and APIs (Route Handlers) live in one app. This version differs from older Next.js: `middleware.ts` is now `proxy.ts`, request APIs such as `cookies()` and `params` are async, and Cache Components are on (ADR-11). Always check `node_modules/next/dist/docs/` first.
 
-**ADR-2: PostgreSQL on Neon with Prisma.** The data is relational (a lead has activities, showings and an agent). Neon's free tier includes branching, so tests and previews can use a separate database branch from production.
+**ADR-2: PostgreSQL on Neon with Prisma.** The data is relational (a lead has activities, showings and an agent). Neon's free tier includes branching, so previews can use a separate database branch from production. Local development and tests use Docker instead (ADR-12).
 
 **ADR-3: Better Auth instead of Auth.js.** The rubric accepts "Auth.js/NextAuth, Clerk, or equivalent." As of Nov 2026, Auth.js v5 is still in beta (`5.0.0-beta.32`). Better Auth is stable (1.7.x), supports Next.js 16 and Prisma 7, has email and password sign-in with built-in rate limiting, and is the first library the Next.js auth guide lists. Each user has a `role`: `HOMEBUYER`, `AGENT` or `BROKER`.
 
@@ -86,6 +86,13 @@ flowchart LR
 - Public listing data can use `"use cache"` with `cacheTag("listings")`.
 - Anything that depends on the signed-in user (session, saved homes, leads) is read inside a `<Suspense>` boundary and is never placed in a shared cache.
 - After a mutation, call `updateTag`, `revalidateTag` or `refresh` as the Next.js 16 caching docs describe.
+
+**ADR-12: Local PostgreSQL in Docker, and Prisma's standard `pg` adapter (Nov 19).**
+- `compose.yaml` runs PostgreSQL 18 (Neon's default version for new projects) on our own computers, with two databases: `closepath_dev` for `npm run dev` and `closepath_test` for integration tests. CI will start the same image as a service container, so tests run against the same database locally and in CI.
+- Prisma uses `@prisma/adapter-pg` (node-postgres) everywhere. The Neon adapter (`@prisma/adapter-neon`) wraps Neon's serverless driver, which connects through Neon's own proxy and can't reach a plain PostgreSQL, so it would not work with Docker or CI. Neon also accepts standard connections, so in Vercel `DATABASE_URL` is Neon's pooled connection string. Only the URL changes between environments.
+- **Why:** integration tests truncate and reseed tables again and again (F2-AC1 access checks, F5-AC5 double-booking). Locally that is faster, works offline, and doesn't use up Neon's free-tier compute. Docker Desktop is free for personal and education use, so the project still costs $0.
+- **Without Docker:** a partner can point `.env.test` at a Neon branch named `test` instead. The code doesn't change.
+- This narrows ADR-2: Neon is now for preview and production.
 
 ## Data model (first draft)
 
@@ -149,14 +156,16 @@ src/
 prisma/
   schema.prisma  seed.ts  seed/listings.json
 e2e/                        # Playwright specs
+docker/postgres/init/       # SQL run on the container's first start (creates closepath_test)
+compose.yaml                # local PostgreSQL 18 (ADR-12)
 ```
 
 ## Environments and configuration
 
 | Environment | App | Database | Notes |
 |---|---|---|---|
-| Local | `npm run dev` | Neon `dev` branch | `.env.local` (never committed) |
-| Test/CI | Vitest, Playwright | Postgres service container in GitHub Actions | `.env.test` values set in the workflow |
+| Local | `npm run dev` | Docker PostgreSQL, database `closepath_dev` (`docker compose up -d`) | `.env.local` (never committed) |
+| Test/CI | Vitest, Playwright | Locally: `closepath_test` in the same Docker container. CI: a `postgres:18-alpine` service container in GitHub Actions | `.env.test` locally (never committed); values set in the workflow in CI |
 | Preview | Vercel preview per PR | Neon `preview` branch | Vercel env vars |
 | Production | `closepath.vercel.app` (from `main`) | Neon `main` branch | Vercel env vars |
 
