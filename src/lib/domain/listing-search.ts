@@ -55,10 +55,22 @@ export function searchListings(
   listings: readonly ListingSummary[],
   query: ListingQuery,
 ): ListingSearchResult {
-  void query;
+  const { city, minPrice, maxPrice, minBeds, minBaths, propertyType } =
+    query.filters;
+  const cityNeedle = city?.trim().toLowerCase();
+  const matches = listings.filter(
+    (l) =>
+      l.status === "ACTIVE" &&
+      (!cityNeedle || l.city.trim().toLowerCase() === cityNeedle) &&
+      (minPrice === undefined || l.price >= minPrice) &&
+      (maxPrice === undefined || l.price <= maxPrice) &&
+      (minBeds === undefined || l.beds >= minBeds) &&
+      (minBaths === undefined || l.baths >= minBaths) &&
+      (propertyType === undefined || l.propertyType === propertyType),
+  );
   return {
-    items: [...listings],
-    total: listings.length,
+    items: matches,
+    total: matches.length,
     page: 1,
     pageCount: 1,
     pageSize: PAGE_SIZE,
