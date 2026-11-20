@@ -27,6 +27,14 @@ export type ScoreBand = (typeof SCORE_BANDS)[number];
 const HOT_MIN = 70;
 const WARM_MIN = 40;
 
+const DAY_MS = 86_400_000;
+const SHOWING_POINTS = 25;
+const SAVED_HOME_POINTS = 5;
+const SAVED_HOMES_CAP = 15;
+const INQUIRY_POINTS = 10;
+const INQUIRIES_CAP = 20;
+const PHONE_POINTS = 10;
+
 /** Everything the score depends on. The DAL builds this from database rows. */
 export type LeadScoreInput = {
   status: LeadStatus;
@@ -41,7 +49,38 @@ export type LeadScoreInput = {
 
 /** Integer from 0 to 100. Pure: reads nothing but its arguments. */
 export function scoreLead(lead: LeadScoreInput, now: Date): number {
-  throw new Error("not implemented", { cause: { lead, now } });
+  if (lead.status === "CLOSED" || lead.status === "LOST") return 0;
+
+  const activityTimes = [
+    ...lead.inquiries.map((inquiry) => inquiry.at.getTime()),
+    ...lead.savedHomes.map((saved) => saved.savedAt.getTime()),
+    ...lead.showingRequests.map((request) => request.requestedAt.getTime()),
+  ];
+  let recency = 0;
+  if (activityTimes.length > 0) {
+    const age = Math.max(0, now.getTime() - Math.max(...activityTimes));
+    if (age <= DAY_MS) recency = 30;
+    else if (age <= 7 * DAY_MS) recency = 20;
+    else if (age <= 30 * DAY_MS) recency = 10;
+  }
+
+  const showing = lead.showingRequests.some(
+    (request) => request.status !== "CANCELLED",
+  )
+    ? SHOWING_POINTS
+    : 0;
+  const saved = Math.min(
+    SAVED_HOME_POINTS * lead.savedHomes.length,
+    SAVED_HOMES_CAP,
+  );
+  const inquiries = Math.min(
+    INQUIRY_POINTS * lead.inquiries.length,
+    INQUIRIES_CAP,
+  );
+  const phone =
+    lead.phone !== null && lead.phone.trim() !== "" ? PHONE_POINTS : 0;
+
+  return recency + showing + saved + inquiries + phone;
 }
 
 /** HOT for 70 to 100, WARM for 40 to 69, COLD for 0 to 39. */
