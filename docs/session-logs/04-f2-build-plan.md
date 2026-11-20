@@ -2,7 +2,8 @@
 HW4 Part 2 evidence: the plan Claude Code proposed in Plan mode and Najib approved
 on Nov 19, 2026, in the session "HW4 Part 2: build F2 scoring from SPEC.md (#7)".
 It was written after the Explore phase and before any code. Copied unchanged from
-Claude Code's plan file. Screenshots of the session: docs/screenshots/hw4-part2-build-*.png
+Claude Code's plan file. Plan mode screenshots: docs/screenshots/hw4-part2-plan-mode-*.png.
+The whole build session: docs/screenshots/hw4-part2-build-*.png
 -->
 
 # Plan: F2 lead scoring and call list (issue #7, SPEC.md)
