@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   type LeadScoreInput,
   type LeadStatus,
@@ -178,6 +178,28 @@ describe("scoreLead statuses", () => {
       expect(scoreOf({ ...MAXED, status })).toBe(100);
     },
   );
+});
+
+describe("scoreLead determinism", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("F2-AC8 gives the same score whatever the system clock says", () => {
+    // 3 days old: 20 recency points + 10 for the inquiry.
+    const lead = makeLead({ inquiries: [{ at: ago(3 * DAY) }] });
+    const clocks = [
+      new Date("2001-01-01T00:00:00.000Z"),
+      new Date("2049-06-15T12:00:00.000Z"),
+    ];
+    vi.useFakeTimers();
+    const scores = clocks.map((clock) => {
+      vi.setSystemTime(clock);
+      expect(Date.now()).toBe(clock.getTime());
+      return scoreLead(lead, NOW);
+    });
+    expect(scores).toEqual([30, 30]);
+  });
 });
 
 describe("scoreBand", () => {
