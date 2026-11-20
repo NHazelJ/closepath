@@ -22,27 +22,29 @@ Sources: the Canvas rubrics, the course's [HW4 page](https://github.com/john-gue
 - [x] **Permissions:** allow, ask and deny lists plus the sandbox in `.claude/settings.json`. Explained and tested in `docs/security.md` ("Claude Code permissions"). Screenshots: `docs/screenshots/hw4-permissions-*.png`.
 - [x] **Context management strategy:** `docs/context-management.md`, with screenshots of `/context` (before and after the import fix), `/compact`, `claude --continue`, `/clear` and `/export`.
 
-### Part 2: Spec, then Explore, Plan, Implement, Commit (15 pts), feature F1 listing search
+### Part 2: Spec, then Explore, Plan, Implement, Commit (15 pts), feature F2 lead scoring and call list (Najib, issue #7, PR #23)
 
-- [ ] **Spec interview:** Claude Code interviews us with the AskUserQuestion tool, then writes `SPEC.md` (session log).
-- [ ] **`SPEC.md` is committed before the first F1 implementation commit.** The git history must show this order. The Prisma schema for listings counts as F1 implementation.
-- [ ] **The spec meets all four criteria:**
-  - self-contained;
-  - names the files and interfaces involved;
-  - states what is out of scope;
-  - ends with an end-to-end verification step that proves the feature works.
-- [ ] `/clear`, then implement from the spec alone.
-- [ ] For each plan item: explore with Glob, Grep and Read (session log).
-- [ ] Plan in Plan mode (session log and screenshot).
-- [ ] Implement from the plan.
-- [ ] 3+ commits that show the workflow.
+We swapped the two features on Nov 19. Parker had already built F1 search test-first, so it became Part 3, and Part 2 moved to F2, which nobody had coded yet. The walkthrough is in `docs/session-logs/hw4-annotated-log.md`.
 
-### Part 3: TDD (15 pts), feature F2 lead scoring, F2-AC5 to F2-AC8 (Parker)
+- [x] **Spec interview:** Claude Code interviewed Najib with the AskUserQuestion tool (2 rounds of 4 questions), then wrote `SPEC.md`. Log: `docs/session-logs/03-f2-spec-interview.txt`.
+- [x] **`SPEC.md` is committed before the first F2 implementation commit:** `6e838ec`, then `79aa6ff` (fast-check), then the 10 build commits.
+- [x] **The spec meets all four criteria:** see `SPEC.md`.
+  - self-contained (sections 1 to 3);
+  - names the files and interfaces involved (sections 4 and 5);
+  - states what is out of scope (section 10);
+  - ends with an end-to-end verification step that proves the feature works (section 11).
+- [x] `/clear`, then implement from the spec alone: a new session whose only inputs were `SPEC.md` and the repo. Log: `docs/session-logs/04-f2-build.txt`.
+- [x] Explore with Glob, Grep and Read (build log, lines 29 to 216).
+- [x] Plan in Plan mode: `docs/session-logs/04-f2-build-plan.md`, `docs/screenshots/hw4-part2-plan-mode-*.png`.
+- [x] Implement from the plan (build log, lines 263 to 850, and `docs/screenshots/hw4-part2-build-*.png`).
+- [x] 3+ commits that show the workflow: 10 red, green and refactor commits (`465b9cc` to `814ee40`).
 
-- [ ] Failing test committed first for each AC (red).
-- [ ] Minimal code to pass (green).
-- [ ] Refactor commits.
-- [ ] All the acceptance criteria covered.
+### Part 3: TDD (15 pts), feature F1 listing search, F1-AC1 to F1-AC5 (Parker, issue #4, PR #5)
+
+- [x] Failing test committed first for each AC (red). Log: `docs/session-logs/02-f1-listing-search.txt`.
+- [x] Minimal code to pass (green).
+- [x] Refactor commits.
+- [x] All the acceptance criteria covered (F1-AC1 to F1-AC5). Six tests that never failed at their red step were found and removed (`aa6bced`).
 
 ### Part 4: Reflection (7.5 pts)
 
@@ -50,7 +52,7 @@ Sources: the Canvas rubrics, the course's [HW4 page](https://github.com/john-gue
   - how Explore, Plan, Implement, Commit compares to our previous approach;
   - **whether writing the spec changed what we built**, pointing to one concrete thing the interview surfaced that we would otherwise have found late;
   - which context management strategies worked best.
-- [ ] Annotated session log in `docs/session-logs/`.
+- [x] Annotated session log in `docs/session-logs/`: `hw4-annotated-log.md`, which points into logs `01` to `04`.
 
 ## Project 3 (200 pts + up to 6 bonus)
 

@@ -83,7 +83,7 @@ Each acceptance criterion (AC) has an ID such as `F2-AC5`. Use these IDs in GitH
 - **F2-AC7:** "Today's call list" shows up to 10 open leads (`New`, `Contacted` or `Showing`) that have not been contacted today. They are ordered by score, highest first; ties go to the lead contacted longest ago, and never-contacted leads come first.
 - **F2-AC8:** Scoring is deterministic: the same lead at the same time always gets the same score, and the score is always between 0 and 100.
 
-> HW4 Part 3 builds F2-AC5 through F2-AC8 with strict TDD.
+> HW4 Part 2 builds F2-AC5 through F2-AC8: a spec interview first (`SPEC.md`), then Explore, Plan, Implement, Commit, test-first. HW4 Part 3 (strict TDD) is F1-AC1 through F1-AC5.
 
 ### F3. Automated follow-up emails (Agent)
 
@@ -157,8 +157,9 @@ A story is done when:
 
 | Sprint | Dates | Goal |
 |---|---|---|
-| Sprint 0 (HW4) | Nov 18 to Nov 23 | Claude Code setup and docs. F1 listing search (HW4 Part 2), F2 lead scoring with TDD (HW4 Part 3). |
-| Sprint 1 | Nov 24 to Dec 4 | Sign-in and roles, F1 complete, F2 CRM, CI/CD pipeline, first Vercel deploy. |
+| Sprint 1 | Nov 18 to Dec 4 | Claude Code setup and docs. HW4, due Nov 23: F1 search logic with TDD (Part 3), F2 scoring from a spec (Part 2). Then CI/CD pipeline, database, sign-in and roles, first Vercel deploy, F1 pages, F2 CRM, and Claude Code hooks, skills, MCP and agents. |
 | Sprint 2 | Dec 5 to Dec 14 | F3 follow-ups, F4 broker dashboard and routing, F5 showings, E2E tests, polish, blog post and video. |
+
+Two sprints, tracked on the [ClosePath project board](https://github.com/users/NHazelJ/projects/2) with the milestones `Sprint 1` and `Sprint 2`. Each issue is one branch and one PR.
 
 The project idea must be approved in the #projects Slack channel by **Dec 9**; the target is this week.
