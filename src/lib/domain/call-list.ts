@@ -21,6 +21,8 @@ export type CallListCandidate = {
   createdAt: Date;
 };
 
+const OPEN = new Set<LeadStatus>(OPEN_STATUSES);
+
 const LA_DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
   timeZone: BROKERAGE_TIME_ZONE,
   year: "numeric",
@@ -28,21 +30,45 @@ const LA_DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
 });
 
-const OPEN = new Set<LeadStatus>(OPEN_STATUSES);
+/** The LA calendar date as `YYYY-MM-DD`, so a later date compares greater as a string. */
+function laDateKey(date: Date): string {
+  const { year, month, day } = Object.fromEntries(
+    LA_DATE_FORMAT.formatToParts(date).map(
+      (part) => [part.type, part.value] as const,
+    ),
+  );
+  return `${year}-${month}-${day}`;
+}
+
+/** Ascending comparison without subtraction, so it is safe for strings and infinities. */
+function ascending<V extends number | string>(a: V, b: V): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+/** Never-contacted leads sort before any contact time. */
+const contactOrder = (at: Date | null) =>
+  at === null ? Number.NEGATIVE_INFINITY : at.getTime();
+
+/** Score high to low, then never contacted, oldest contact, oldest createdAt, smaller id (D8). */
+function compareCallOrder(a: CallListCandidate, b: CallListCandidate): number {
+  return (
+    ascending(b.score, a.score) ||
+    ascending(contactOrder(a.lastContactedAt), contactOrder(b.lastContactedAt)) ||
+    ascending(a.createdAt.getTime(), b.createdAt.getTime()) ||
+    ascending(a.id, b.id)
+  );
+}
 
 /** True when lastContactedAt falls on now's calendar date in LA, or later. */
 export function isContactedToday(
   lastContactedAt: Date | null,
   now: Date,
 ): boolean {
-  if (lastContactedAt === null) return false;
-  const toKey = (date: Date) => {
-    const parts = Object.fromEntries(
-      LA_DATE_FORMAT.formatToParts(date).map((part) => [part.type, part.value]),
-    );
-    return `${parts.year}-${parts.month}-${parts.day}`;
-  };
-  return toKey(lastContactedAt) >= toKey(now);
+  return (
+    lastContactedAt !== null && laDateKey(lastContactedAt) >= laDateKey(now)
+  );
 }
 
 /**
@@ -59,17 +85,6 @@ export function buildCallList<T extends CallListCandidate>(
       (lead) =>
         OPEN.has(lead.status) && !isContactedToday(lead.lastContactedAt, now),
     )
-    .sort((a, b) => {
-      if (a.score !== b.score) return b.score - a.score;
-      const aContact =
-        a.lastContactedAt === null ? -Infinity : a.lastContactedAt.getTime();
-      const bContact =
-        b.lastContactedAt === null ? -Infinity : b.lastContactedAt.getTime();
-      if (aContact !== bContact) return aContact < bContact ? -1 : 1;
-      const created = a.createdAt.getTime() - b.createdAt.getTime();
-      if (created !== 0) return created;
-      if (a.id === b.id) return 0;
-      return a.id < b.id ? -1 : 1;
-    })
+    .sort(compareCallOrder)
     .slice(0, CALL_LIST_SIZE);
 }
