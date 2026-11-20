@@ -1,0 +1,47 @@
+/**
+ * F2 lead scoring: turns a lead's buyer activity into a 0 to 100 score and a band.
+ * Pure: no database, no clock. Callers pass `now`, and the score is computed on read.
+ */
+
+export const LEAD_STATUSES = [
+  "NEW",
+  "CONTACTED",
+  "SHOWING",
+  "UNDER_CONTRACT",
+  "CLOSED",
+  "LOST",
+] as const;
+export type LeadStatus = (typeof LEAD_STATUSES)[number];
+
+export const SHOWING_STATUSES = [
+  "REQUESTED",
+  "CONFIRMED",
+  "DECLINED",
+  "CANCELLED",
+] as const;
+export type ShowingStatus = (typeof SHOWING_STATUSES)[number];
+
+export const SCORE_BANDS = ["HOT", "WARM", "COLD"] as const;
+export type ScoreBand = (typeof SCORE_BANDS)[number];
+
+/** Everything the score depends on. The DAL builds this from database rows. */
+export type LeadScoreInput = {
+  status: LeadStatus;
+  phone: string | null;
+  /** Every "Request info" submission for this lead, including the one that created it. */
+  inquiries: readonly { at: Date }[];
+  /** Homes the lead's buyer account has saved right now (an unsave removes one). */
+  savedHomes: readonly { savedAt: Date }[];
+  /** Every showing request by the lead's buyer account, in any status. */
+  showingRequests: readonly { requestedAt: Date; status: ShowingStatus }[];
+};
+
+/** Integer from 0 to 100. Pure: reads nothing but its arguments. */
+export function scoreLead(lead: LeadScoreInput, now: Date): number {
+  throw new Error("not implemented", { cause: { lead, now } });
+}
+
+/** HOT for 70 to 100, WARM for 40 to 69, COLD for 0 to 39. */
+export function scoreBand(score: number): ScoreBand {
+  throw new Error("not implemented", { cause: { score } });
+}
