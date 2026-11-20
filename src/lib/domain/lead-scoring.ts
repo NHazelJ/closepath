@@ -24,6 +24,9 @@ export type ShowingStatus = (typeof SHOWING_STATUSES)[number];
 export const SCORE_BANDS = ["HOT", "WARM", "COLD"] as const;
 export type ScoreBand = (typeof SCORE_BANDS)[number];
 
+const HOT_MIN = 70;
+const WARM_MIN = 40;
+
 /** Everything the score depends on. The DAL builds this from database rows. */
 export type LeadScoreInput = {
   status: LeadStatus;
@@ -43,5 +46,7 @@ export function scoreLead(lead: LeadScoreInput, now: Date): number {
 
 /** HOT for 70 to 100, WARM for 40 to 69, COLD for 0 to 39. */
 export function scoreBand(score: number): ScoreBand {
-  throw new Error("not implemented", { cause: { score } });
+  if (score >= HOT_MIN) return "HOT";
+  if (score >= WARM_MIN) return "WARM";
+  return "COLD";
 }
