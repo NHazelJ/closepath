@@ -48,7 +48,7 @@ We swapped the two features on Nov 19. Parker had already built F1 search test-f
 
 ### Part 4: Reflection (7.5 pts)
 
-- [ ] 1 to 2 page reflection in `docs/reflections/hw4-reflection.md`. It answers:
+- [x] 1 to 2 page reflection in `docs/reflections/hw4-reflection.md` (both partners, about 820 words). It answers:
   - how Explore, Plan, Implement, Commit compares to our previous approach;
   - **whether writing the spec changed what we built**, pointing to one concrete thing the interview surfaced that we would otherwise have found late;
   - which context management strategies worked best.
